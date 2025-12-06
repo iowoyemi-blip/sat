@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Geometry & Trigonometry Master</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        .option-btn { transition: all 0.2s; }
+        .option-btn:hover { transform: translateY(-1px); }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        select { -webkit-appearance: none; appearance: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div id="app" class="w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col" style="min-height: 600px;">
+        
+        <!-- Header -->
+        <header class="bg-emerald-700 text-white p-6 shadow-md z-10">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Geometry & Trig Master</h1>
+                    <p class="text-emerald-200 text-sm">SAT Math Practice</p>
+                </div>
+                <!-- Home Button (Hidden on Start Screen) -->
+                <button id="home-btn" onclick="goHome()" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 py-1 px-3 rounded border border-emerald-500 transition">
+                    Change Topic
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 relative bg-white">
+            
+            <!-- 1. TOPIC SELECTION SCREEN -->
+            <div id="start-screen" class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center fade-in z-0 overflow-y-auto">
+                <div class="mb-8 max-w-md">
+                    <div class="inline-block p-4 rounded-full bg-emerald-50 text-emerald-600 mb-6 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm8.486-.486a5 5 0 11-7.072-7.072 5 5 0 017.072 7.072z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-3">Select a Domain</h2>
+                    <p class="text-slate-500 mb-8">Focus your practice on spatial reasoning or trigonometric relationships.</p>
+                    
+                    <div class="relative text-left">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Current Module</label>
+                        <select id="topic-selector" class="block w-full bg-slate-50 border border-slate-300 text-slate-700 py-4 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-emerald-500 shadow-sm text-lg cursor-pointer">
+                            <option value="geometry">1. Geometry (Volume, Area, Circles)</option>
+                            <option value="trigonometry">2. Trigonometry (Ratios, Radians, Identities)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 pt-6 text-slate-500">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="w-full max-w-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition hover:scale-[1.02] flex items-center justify-center gap-2">
+                    <span>Start Practice</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 2. QUIZ INTERFACE -->
+            <div id="quiz-interface" class="absolute inset-0 hidden flex flex-col bg-white z-20">
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 h-1">
+                    <div id="progress-bar" class="bg-emerald-500 h-1 transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Scrollable Content -->
+                <div class="flex-1 overflow-y-auto p-6 md:p-10 pb-20">
+                    <!-- Question Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
+                            Q<span id="current-q-num">1</span> <span class="text-slate-300 mx-1">/</span> <span id="total-q-num">15</span>
+                        </span>
+                        <button onclick="toggleHint()" class="text-sm text-emerald-600 hover:text-emerald-800 font-medium flex items-center gap-1 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Hint
+                        </button>
+                    </div>
+
+                    <!-- Hint Box -->
+                    <div id="hint-box" class="hidden bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded text-sm text-amber-800 fade-in shadow-sm">
+                        <span class="font-bold block mb-1">💡 Hint</span> 
+                        <span id="hint-text"></span>
+                    </div>
+
+                    <!-- Image Container -->
+                    <div id="image-container" class="mb-6 hidden flex justify-center bg-slate-50 rounded-lg p-4 border border-slate-100"></div>
+
+                    <!-- Question Text -->
+                    <div id="question-text" class="text-xl md:text-2xl font-medium text-slate-800 mb-8 leading-relaxed"></div>
+
+                    <!-- Options Grid -->
+                    <div id="options-container" class="grid gap-4 max-w-2xl mx-auto">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div id="feedback-section" class="hidden mt-8 pt-6 border-t border-slate-100 fade-in bg-slate-50 rounded-xl p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div id="feedback-icon" class="rounded-full p-1"></div>
+                            <div id="feedback-header" class="font-bold text-lg"></div>
+                        </div>
+                        <div id="feedback-rationale" class="text-slate-600 text-base leading-relaxed mb-6 pl-1"></div>
+                        <button id="next-btn" onclick="nextQuestion()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                            Next Question
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. RESULTS SCREEN -->
+            <div id="results-screen" class="absolute inset-0 hidden p-8 overflow-y-auto bg-slate-50 z-30 flex flex-col items-center">
+                <div class="text-center w-full max-w-2xl">
+                    <div class="mb-2 text-emerald-600 font-bold uppercase tracking-widest text-xs">Topic Complete</div>
+                    <h2 id="result-title" class="text-3xl font-bold mb-6 text-slate-900">Summary</h2>
+                    
+                    <!-- Score Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col items-center">
+                        <div class="text-6xl font-black text-slate-800 mb-2">
+                            <span id="final-score">0</span><span class="text-3xl text-slate-400 font-medium">/15</span>
+                        </div>
+                        <div id="final-percent" class="text-sm font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full mb-4">0%</div>
+                        <p id="final-message" class="text-slate-600">Loading...</p>
+                    </div>
+
+                    <div class="text-left w-full">
+                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            Detailed Analysis
+                        </h3>
+                        <div id="analysis-content" class="space-y-4 text-sm text-slate-600 pb-12">
+                            <!-- Analysis Items -->
+                        </div>
+                    </div>
+
+                    <!-- Fixed Bottom Bar for Results -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-slate-200 flex justify-center md:absolute md:bottom-auto md:relative md:bg-transparent md:border-0 md:p-0">
+                        <button onclick="goHome()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg w-full md:w-auto">
+                            Finish & Choose New Topic
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- APP LOGIC -->
+    <script>
+        const masterData = {
+            geometry: [
+                {
+                    q: "A circle has equation $(x-3)^2 + (y+4)^2 = 25$. What are the coordinates of the center and the length of the radius?",
+                    options: ["Center $(3, -4)$, Radius 5", "Center $(-3, 4)$, Radius 5", "Center $(3, -4)$, Radius 25", "Center $(-3, 4)$, Radius 25"],
+                    correct: 0,
+                    rationale: "Standard form is $(x-h)^2 + (y-k)^2 = r^2$. Here, $h=3, k=-4$ and $r^2=25$, so $r=5$.",
+                    hint: "Compare to $(x-h)^2 + (y-k)^2 = r^2$."
+                },
+                {
+                    q: "The volume of a cube is 64. What is the total surface area of the cube?",
+                    options: ["96", "64", "16", "384"],
+                    correct: 0,
+                    rationale: "Volume $s^3 = 64 \\rightarrow s=4$. Surface Area $= 6s^2 = 6(4^2) = 6(16) = 96$.",
+                    hint: "Find side length first, then calculate area of 6 faces."
+                },
+                {
+                    q: "In $\\triangle ABC$, $\\angle A = 40^\\circ$ and $\\angle B = 60^\\circ$. What is the measure of the exterior angle at vertex C?",
+                    options: ["$100^\\circ$", "$80^\\circ$", "$140^\\circ$", "$120^\\circ$"],
+                    correct: 0,
+                    rationale: "Exterior angle equals sum of remote interior angles. Ext C = $\\angle A + \\angle B = 40 + 60 = 100$.",
+                    hint: "Exterior angle theorem: Ext = sum of two opposite interior angles."
+                },
+                {
+                    q: "A right circular cylinder has radius 3 and height 5. What is its volume?",
+                    options: ["$45\\pi$", "$15\\pi$", "$75\\pi$", "$225\\pi$"],
+                    correct: 0,
+                    rationale: "$V = \\pi r^2 h = \\pi (3^2)(5) = \\pi(9)(5) = 45\\pi$.",
+                    hint: "Formula: $V = \\pi r^2 h$."
+                },
+                {
+                    q: "What is the area of a sector of a circle with radius 6 and central angle $60^\\circ$?",
+                    options: ["$6\\pi$", "$3\\pi$", "$36\\pi$", "$12\\pi$"],
+                    correct: 0,
+                    rationale: "Fraction of circle is $60/360 = 1/6$. Area = $\\frac{1}{6} \\pi r^2 = \\frac{1}{6} \\pi (36) = 6\\pi$.",
+                    hint: "Calculate fraction of the total area $\\pi r^2$."
+                },
+                {
+                    q: "Two similar triangles have side lengths in ratio 2:3. What is the ratio of their areas?",
+                    options: ["4:9", "2:3", "8:27", "1:1.5"],
+                    correct: 0,
+                    rationale: "Area ratio is the square of the side ratio. $(2/3)^2 = 4/9$.",
+                    hint: "Square the side ratio."
+                },
+                {
+                    q: "A line passes through $(2, 5)$ and $(4, 9)$. What is its slope?",
+                    options: ["$2$", "$4$", "$0.5$", "$1$"],
+                    correct: 0,
+                    rationale: "$m = \\frac{y_2 - y_1}{x_2 - x_1} = \\frac{9-5}{4-2} = \\frac{4}{2} = 2$.",
+                    hint: "Rise over run formula."
+                },
+                {
+                    q: "The diagonal of a rectangle is 10 and one side is 6. What is the area?",
+                    options: ["48", "60", "24", "80"],
+                    correct: 0,
+                    rationale: "Use Pythagoras to find other side: $x^2 + 6^2 = 10^2 \\rightarrow x^2 + 36 = 100 \\rightarrow x^2 = 64 \\rightarrow x=8$. Area $= 6 \\times 8 = 48$.",
+                    hint: "Find the other side using $a^2+b^2=c^2$ then multiply L x W."
+                },
+                {
+                    q: "If line $k$ is perpendicular to $y = 3x + 2$, what is the slope of line $k$?",
+                    options: ["$-1/3$", "$3$", "$1/3$", "$-3$"],
+                    correct: 0,
+                    rationale: "Perpendicular slopes are negative reciprocals. Negative reciprocal of 3 is $-1/3$.",
+                    hint: "Flip the fraction and change the sign."
+                },
+                {
+                    q: "Sum of interior angles of a pentagon?",
+                    options: ["$540^\\circ$", "$360^\\circ$", "$720^\\circ$", "$180^\\circ$"],
+                    correct: 0,
+                    rationale: "Formula $(n-2) \\times 180$. $(5-2) \\times 180 = 3 \\times 180 = 540$.",
+                    hint: "Formula: $(n-2) \\times 180$."
+                },
+                {
+                    q: "A sphere fits exactly inside a cube of side 6. Volume of sphere?",
+                    options: ["$36\\pi$", "$288\\pi$", "$144\\pi$", "$108\\pi$"],
+                    correct: 0,
+                    rationale: "Diameter of sphere = 6, so radius $r=3$. $V = \\frac{4}{3}\\pi r^3 = \\frac{4}{3}\\pi(27) = 36\\pi$.",
+                    hint: "Radius is half the side length."
+                },
+                {
+                    q: "Distance between $(1, 2)$ and $(4, 6)$?",
+                    options: ["$5$", "$7$", "$25$", "$3$"],
+                    correct: 0,
+                    rationale: "$\\sqrt{(4-1)^2 + (6-2)^2} = \\sqrt{3^2 + 4^2} = \\sqrt{9+16} = \\sqrt{25} = 5$.",
+                    hint: "Distance formula (Pythagorean theorem)."
+                },
+                {
+                    q: "In circle $O$, chord $AB$ is 8 units from center. Radius is 10. Length of chord $AB$?",
+                    options: ["12", "6", "16", "20"],
+                    correct: 0,
+                    rationale: "Right triangle formed by radius, distance, and half-chord. $x^2 + 8^2 = 10^2 \\rightarrow x^2 = 36 \\rightarrow x=6$. Chord is $2x = 12$.",
+                    hint: "Draw a right triangle with radius as hypotenuse."
+                },
+                {
+                    q: "Two lines intersect. If one angle is $40^\\circ$, what is the measure of the adjacent angle?",
+                    options: ["$140^\\circ$", "$40^\\circ$", "$50^\\circ$", "$90^\\circ$"],
+                    correct: 0,
+                    rationale: "Angles on a line add to $180^\\circ$. $180 - 40 = 140$.",
+                    hint: "Linear pairs are supplementary."
+                },
+                {
+                    q: "Volume of a cone with radius 3 and height 4.",
+                    options: ["$12\\pi$", "$36\\pi$", "$15\\pi$", "$9\\pi$"],
+                    correct: 0,
+                    rationale: "$V = \\frac{1}{3} \\pi r^2 h = \\frac{1}{3} \\pi (9)(4) = 12\\pi$.",
+                    hint: "Cone is 1/3 volume of cylinder."
+                }
+            ],
+            trigonometry: [
+                {
+                    q: "In a right triangle, if $\\sin A = \\frac{3}{5}$, what is $\\tan A$?",
+                    options: ["$\\frac{3}{4}$", "$\\frac{4}{3}$", "$\\frac{5}{3}$", "$\\frac{4}{5}$"],
+                    correct: 0,
+                    rationale: "Opposite=3, Hypotenuse=5. This is a 3-4-5 triangle, so Adjacent=4. $\\tan = Opp/Adj = 3/4$.",
+                    hint: "Use Pythagorean theorem to find the adjacent side."
+                },
+                {
+                    q: "Which is equivalent to $\\cos(90^\\circ - x)$?",
+                    options: ["$\\sin x$", "$\\cos x$", "$-\\sin x$", "$\\tan x$"],
+                    correct: 0,
+                    rationale: "Cofunction identity: $\\sin(\\theta) = \\cos(90-\\theta)$.",
+                    hint: "Sine and Cosine are cofunctions."
+                },
+                {
+                    q: "Convert $\\frac{\\pi}{3}$ radians to degrees.",
+                    options: ["$60^\\circ$", "$30^\\circ$", "$45^\\circ$", "$90^\\circ$"],
+                    correct: 0,
+                    rationale: "Multiply by $180/\\pi$. $(\\pi/3) \\times (180/\\pi) = 180/3 = 60$.",
+                    hint: "Replace $\\pi$ with $180^\\circ$."
+                },
+                {
+                    q: "If $\\sin \\theta = 0.5$ and $\\theta$ is acute, what is $\\theta$?",
+                    options: ["$30^\\circ$", "$60^\\circ$", "$45^\\circ$", "$0^\\circ$"],
+                    correct: 0,
+                    rationale: "From special triangles, $\\sin(30^\\circ) = 1/2$.",
+                    hint: "Recall 30-60-90 triangle ratios."
+                },
+                {
+                    q: "Value of $\\tan(45^\\circ)$.",
+                    options: ["$1$", "$0$", "Undefined", "$\\sqrt{2}$"],
+                    correct: 0,
+                    rationale: "In 45-45-90, legs are equal. $\\tan = Opp/Adj = x/x = 1$.",
+                    hint: "Opposite and adjacent sides are equal."
+                },
+                {
+                    q: "Simplify $\\sin^2 x + \\cos^2 x$.",
+                    options: ["$1$", "$0$", "$2$", "$\\tan^2 x$"],
+                    correct: 0,
+                    rationale: "Pythagorean Identity: $\\sin^2 + \\cos^2$ always equals 1.",
+                    hint: "This is the fundamental Pythagorean Identity."
+                },
+                {
+                    q: "In a unit circle, the x-coordinate of a point corresponds to:",
+                    options: ["Cosine", "Sine", "Tangent", "Radius"],
+                    correct: 0,
+                    rationale: "Coordinates are $(\\cos \\theta, \\sin \\theta)$. x is Cosine.",
+                    hint: "Alphabetical: C comes before S, x comes before y."
+                },
+                {
+                    q: "If $\\cos A = 0.8$, what is $\\sin(90-A)$?",
+                    options: ["$0.8$", "$0.6$", "$0.2$", "$1.0$"],
+                    correct: 0,
+                    rationale: "Cofunction identity: $\\sin(90-A) = \\cos A$. So it is 0.8.",
+                    hint: "Use the cofunction identity."
+                },
+                {
+                    q: "Length of hypotenuse in a 45-45-90 triangle with leg 5.",
+                    options: ["$5\\sqrt{2}$", "$5\\sqrt{3}$", "$10$", "$5$"],
+                    correct: 0,
+                    rationale: "Hypotenuse is leg $\\times \\sqrt{2}$.",
+                    hint: "Ratio is $x : x : x\\sqrt{2}$."
+                },
+                {
+                    q: "Which angle is coterminal with $30^\\circ$?",
+                    options: ["$390^\\circ$", "$330^\\circ$", "$210^\\circ$", "$90^\\circ$"],
+                    correct: 0,
+                    rationale: "Add $360^\\circ$. $30 + 360 = 390$.",
+                    hint: "Add or subtract 360 degrees."
+                },
+                {
+                    q: "If $\\tan x$ is undefined, $x$ could be:",
+                    options: ["$90^\\circ$", "$0^\\circ$", "$45^\\circ$", "$180^\\circ$"],
+                    correct: 0,
+                    rationale: "$\\tan = \\sin/\\cos$. Undefined when $\\cos = 0$, which happens at $90^\\circ$.",
+                    hint: "Where is the x-coordinate zero on the unit circle?"
+                },
+                {
+                    q: "In a right triangle with hypotenuse 10 and angle $30^\\circ$, length of opposite side?",
+                    options: ["$5$", "$5\\sqrt{3}$", "$10$", "$20$"],
+                    correct: 0,
+                    rationale: "Opposite 30 is half the hypotenuse. $10/2 = 5$.",
+                    hint: "Use $\\sin(30) = 0.5$."
+                },
+                {
+                    q: "Convert $270^\\circ$ to radians.",
+                    options: ["$\\frac{3\\pi}{2}$", "$\\pi$", "$\\frac{2\\pi}{3}$", "$2\\pi$"],
+                    correct: 0,
+                    rationale: "$270 \\times (\\pi/180) = 3\\pi/2$.",
+                    hint: "Multiply by $\\pi/180$."
+                },
+                {
+                    q: "If $\\sin x = 4/5$, what is $\\cos x$? (x in Q1)",
+                    options: ["$3/5$", "$4/5$", "$5/4$", "$3/4$"],
+                    correct: 0,
+                    rationale: "3-4-5 triangle. If sin is 4/5, cos is 3/5.",
+                    hint: "Use Pythagorean triple 3-4-5."
+                },
+                {
+                    q: "Value of $\\cos(0^\\circ)$.",
+                    options: ["$1$", "$0$", "$-1$", "Undefined"],
+                    correct: 0,
+                    rationale: "At 0 degrees, coordinates are $(1, 0)$. Cosine is x-value.",
+                    hint: "Think of the point (1,0) on the unit circle."
+                }
+            ]
+        };
+
+        // --- STATE & UTILS ---
+        let currentTopic = 'geometry';
+        let currentQIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let isAnswered = false;
+
+        const els = {
+            app: document.getElementById('app'),
+            screens: {
+                start: document.getElementById('start-screen'),
+                quiz: document.getElementById('quiz-interface'),
+                results: document.getElementById('results-screen')
+            },
+            homeBtn: document.getElementById('home-btn'),
+            selector: document.getElementById('topic-selector'),
+            progress: document.getElementById('progress-bar'),
+            qNum: document.getElementById('current-q-num'),
+            totalQ: document.getElementById('total-q-num'),
+            qText: document.getElementById('question-text'),
+            imgContainer: document.getElementById('image-container'),
+            options: document.getElementById('options-container'),
+            hintBox: document.getElementById('hint-box'),
+            hintText: document.getElementById('hint-text'),
+            feedback: document.getElementById('feedback-section'),
+            feedbackHeader: document.getElementById('feedback-header'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            feedbackRationale: document.getElementById('feedback-rationale'),
+            nextBtn: document.getElementById('next-btn'),
+            results: {
+                title: document.getElementById('result-title'),
+                score: document.getElementById('final-score'),
+                percent: document.getElementById('final-percent'),
+                msg: document.getElementById('final-message'),
+                analysis: document.getElementById('analysis-content')
+            }
+        };
+
+        function initMath() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "$", right: "$", display: false}
+                    ]
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initMath);
+
+        function goHome() {
+            showScreen('start');
+            els.homeBtn.classList.add('hidden');
+        }
+
+        function showScreen(name) {
+            Object.values(els.screens).forEach(s => s.classList.add('hidden'));
+            els.screens[name].classList.remove('hidden');
+        }
+
+        function startQuiz() {
+            currentTopic = els.selector.value;
+            currentQIndex = 0;
+            score = 0;
+            userAnswers = [];
+            isAnswered = false;
+            els.totalQ.textContent = masterData[currentTopic].length;
+            showScreen('quiz');
+            els.homeBtn.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            isAnswered = false;
+            els.feedback.classList.add('hidden');
+            els.hintBox.classList.add('hidden');
+            els.imgContainer.classList.add('hidden');
+            els.imgContainer.innerHTML = '';
+
+            const data = masterData[currentTopic];
+            const q = data[currentQIndex];
+
+            const progressPct = (currentQIndex / data.length) * 100;
+            els.progress.style.width = `${progressPct}%`;
+            els.qNum.textContent = currentQIndex + 1;
+
+            els.qText.innerHTML = q.q;
+            els.hintText.innerHTML = q.hint;
+
+            // Simple shuffle
+            const indices = q.options.map((_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+
+            els.options.innerHTML = '';
+            indices.forEach(i => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-5 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition bg-white shadow-sm flex items-center group";
+                btn.innerHTML = `
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold text-sm mr-4 group-hover:bg-emerald-200 group-hover:text-emerald-700 transition">${String.fromCharCode(65 + indices.indexOf(i))}</span>
+                    <span class="text-lg text-slate-700 flex-1">${q.options[i]}</span>
+                `;
+                btn.onclick = () => checkAnswer(i, btn, indices);
+                els.options.appendChild(btn);
+            });
+
+            els.nextBtn.innerHTML = (currentQIndex === data.length - 1) 
+                ? 'Finish Practice'
+                : 'Next Question';
+
+            initMath();
+        }
+
+        function toggleHint() {
+            els.hintBox.classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedIndex, btn, indices) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const data = masterData[currentTopic];
+            const q = data[currentQIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            if (isCorrect) score++;
+            userAnswers.push({ qIndex: currentQIndex, correct: isCorrect, selected: selectedIndex });
+
+            const buttons = els.options.children;
+            Array.from(buttons).forEach((b, idx) => {
+                b.disabled = true;
+                b.classList.remove('hover:border-emerald-500', 'hover:bg-emerald-50');
+                const realIndex = indices[idx];
+                
+                if (realIndex === q.correct) {
+                    b.classList.add('border-green-500', 'bg-green-50');
+                    b.querySelector('span:first-child').classList.add('bg-green-200', 'text-green-800');
+                } else if (b === btn && !isCorrect) {
+                    b.classList.add('border-red-500', 'bg-red-50');
+                    b.querySelector('span:first-child').classList.add('bg-red-200', 'text-red-800');
+                } else {
+                    b.classList.add('opacity-50');
+                }
+            });
+
+            els.feedback.classList.remove('hidden');
+            els.feedbackIcon.className = isCorrect ? "rounded-full p-1 bg-green-100 text-green-600" : "rounded-full p-1 bg-red-100 text-red-600";
+            els.feedbackIcon.innerHTML = isCorrect 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+            
+            els.feedbackHeader.textContent = isCorrect ? "Correct!" : "Incorrect";
+            els.feedbackHeader.className = isCorrect ? "font-bold text-lg text-green-700" : "font-bold text-lg text-red-700";
+            els.feedbackRationale.innerHTML = q.rationale;
+            
+            els.feedback.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            initMath();
+        }
+
+        function nextQuestion() {
+            const data = masterData[currentTopic];
+            if (currentQIndex < data.length - 1) {
+                currentQIndex++;
+                renderQuestion();
+                els.screens.quiz.querySelector('.overflow-y-auto').scrollTop = 0;
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            const data = masterData[currentTopic];
+            showScreen('results');
+            els.homeBtn.classList.add('hidden');
+
+            const pct = Math.round((score / data.length) * 100);
+            
+            els.results.score.textContent = score;
+            els.results.percent.textContent = `${pct}%`;
+            
+            let msg = "";
+            if (pct >= 90) msg = "Excellent! You've mastered this topic.";
+            else if (pct >= 70) msg = "Great job! Review your mistakes to get perfect.";
+            else msg = "Good practice. Keep reviewing the concepts.";
+            els.results.msg.textContent = msg;
+
+            els.results.analysis.innerHTML = '';
+            
+            data.forEach((q, idx) => {
+                const ua = userAnswers.find(a => a.qIndex === idx);
+                const isCorrect = ua ? ua.correct : false;
+                
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`;
+                
+                item.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 min-w-[24px]">
+                            ${isCorrect 
+                                ? '<div class="w-6 h-6 rounded-full bg-green-200 text-green-700 flex items-center justify-center font-bold text-xs">✓</div>' 
+                                : '<div class="w-6 h-6 rounded-full bg-red-200 text-red-700 flex items-center justify-center font-bold text-xs">✗</div>'
+                            }
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-slate-800 font-medium mb-1">Q${idx + 1}: ${q.q}</div>
+                            ${!isCorrect ? `<div class="text-xs text-red-600 font-bold uppercase mb-1">Correct Answer: ${q.options[q.correct]}</div>` : ''}
+                            <div class="text-slate-600 text-sm mt-2 border-t ${isCorrect ? 'border-green-200' : 'border-red-200'} pt-2">
+                                <span class="font-bold text-xs uppercase opacity-70">Explanation:</span> ${q.rationale}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                els.results.analysis.appendChild(item);
+            });
+            
+            initMath();
+        }
+    </script>
+</body>
+</html>
