@@ -1,7 +1,36 @@
-<html><head><style>
-body{font-family:Arial;background:#eef2f7;padding:20px;}
-.unit{font-size:24px;margin-top:30px;font-weight:bold;}
-.grid{display:flex;flex-wrap:wrap;gap:15px;margin:15px 0;}
-.card{background:white;padding:15px 25px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.1);}
-.card a{text-decoration:none;color:#1e40af;font-weight:600;}
-</style></head><body><div class='unit'>Unit 1</div><div class='grid'><div class='card'><a href='1-1_simplify_square_roots.html'>1-1 Simplify Square Roots</a></div><div class='card'><a href='1-2_combining_square_roots.html'>1-2 Combining Square Roots</a></div><div class='card'><a href='1-3_exponents.html'>1-3 Exponents</a></div></div><div class='unit'>Unit 2</div><div class='grid'><div class='card'><a href='2-1_order_of_ops_evaluate_expressions.html'>2-1 Order Of Ops Evaluate Expressions</a></div><div class='card'><a href='2-2_solve_equations_and_literal-eq.html'>2-2 Solve Equations And Literal-Eq</a></div><div class='card'><a href='2-3_expression-equations_word_problems.html'>2-3 Expression-Equations Word Problems</a></div><div class='card'><a href='2-4-1_solve_simple_inqualities.html'>2-4-1 Solve Simple Inqualities</a></div><div class='card'><a href='2-4-2_solve_compound_inqualities.html'>2-4-2 Solve Compound Inqualities</a></div></div><div class='unit'>Unit 3</div><div class='grid'><div class='card'><a href='3-1-1_function_or_not.html'>3-1-1 Function Or Not</a></div><div class='card'><a href='3-1-2_domain_range.html'>3-1-2 Domain Range</a></div><div class='card'><a href='3-2_function_input_output.html'>3-2 Function Input Output</a></div><div class='card'><a href='3-3_slope_table_graph_points.html'>3-3 Slope Table Graph Points</a></div></div><div class='unit'>Unit 4</div><div class='grid'><div class='card'><a href='4-1_write_linear_equations_pt-slop_2-pts_.html'>4-1 Write Linear Equations Pt-Slop 2-Pts </a></div><div class='card'><a href='4-2_graph_linear_equation_both_forms.html'>4-2 Graph Linear Equation Both Forms</a></div><div class='card'><a href='4-3_write_equat_paralle_perp_vert_horiz.html'>4-3 Write Equat Paralle Perp Vert Horiz</a></div><div class='card'><a href='4-4_graph_linear_inequalities.html'>4-4 Graph Linear Inequalities</a></div></div><div class='unit'>Unit 5</div><div class='grid'><div class='card'><a href='5-1_graph_sys_linear_equations__both_forms.html'>5-1 Graph Sys Linear Equations  Both Forms</a></div><div class='card'><a href='5-2_systems_algebra_word-problem.html'>5-2 Systems Algebra Word-Problem</a></div><div class='card'><a href='5-3_graph_sys_linear_inequal_both_forms.html'>5-3 Graph Sys Linear Inequal Both Forms</a></div><div class='card'><a href='5-4_system_inequal_word_problem.html'>5-4 System Inequal Word Problem</a></div></div><div class='unit'>Unit 6</div><div class='grid'><div class='card'><a href='6-1_polynomial_vocabulary.html'>6-1 Polynomial Vocabulary</a></div><div class='card'><a href='6-2_polynomial_operations.html'>6-2 Polynomial Operations</a></div><div class='card'><a href='6-3_factoring_polynomials.html'>6-3 Factoring Polynomials</a></div></div><div class='unit'>Unit 7</div><div class='grid'><div class='card'><a href='7-1_solving_quadractic_equations.html'>7-1 Solving Quadractic Equations</a></div><div class='card'><a href='7-2_graphing_quadractics.html'>7-2 Graphing Quadractics</a></div></div><div class='unit'>Unit 8</div><div class='grid'><div class='card'><a href='8-1_linear_quad_exp_tables.html'>8-1 Linear Quad Exp Tables</a></div><div class='card'><a href='8-2_exponential_intro.html'>8-2 Exponential Intro</a></div></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Miscellaneous Apps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#f0f4f8; margin:0; padding:2rem; text-align:center; }
+    h1 { color:#2c3e50; margin-bottom:2rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:1.5rem; max-width:1100px; margin:0 auto; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,.1); padding:1.2rem; transition:transform .2s, box-shadow .2s; }
+    .card:hover { transform:translateY(-5px); box-shadow:0 6px 12px rgba(0,0,0,.15); }
+    .card a { text-decoration:none; font-size:1rem; color:#2980b9; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h1>SAT Practice Apps</h1>
+
+  <div class="grid" id="appGrid"></div>
+
+  <script>
+    const apps = [
+      { file: "passport_advanced_math.html", title: "Passport to Advanced Math" },
+      { file: "geometry_trig.html.html", title: "Geometry and Trigonometry" }
+    ];
+
+    const grid = document.getElementById("appGrid");
+    apps.forEach(app => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<a href="${app.file}" target="_blank">${app.title}</a>`;
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>
