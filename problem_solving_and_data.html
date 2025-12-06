@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Data Analysis & Problem Solving</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        .option-btn { transition: all 0.2s; }
+        .option-btn:hover { transform: translateY(-1px); }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        select { -webkit-appearance: none; appearance: none; }
+        
+        /* Custom Table Styling for Data Questions */
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9em; }
+        .data-table th { background-color: #f3f4f6; text-align: left; padding: 8px; border-bottom: 2px solid #e5e7eb; }
+        .data-table td { padding: 8px; border-bottom: 1px solid #e5e7eb; }
+        .data-table tr:last-child td { border-bottom: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div id="app" class="w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col" style="min-height: 600px;">
+        
+        <!-- Header -->
+        <header class="bg-cyan-700 text-white p-6 shadow-md z-10">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Problem Solving & Data</h1>
+                    <p class="text-cyan-200 text-sm">SAT Math Practice</p>
+                </div>
+                <!-- Home Button (Hidden on Start Screen) -->
+                <button id="home-btn" onclick="goHome()" class="hidden text-xs bg-cyan-600 hover:bg-cyan-500 py-1 px-3 rounded border border-cyan-500 transition">
+                    Change Topic
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 relative bg-white">
+            
+            <!-- 1. TOPIC SELECTION SCREEN -->
+            <div id="start-screen" class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center fade-in z-0 overflow-y-auto">
+                <div class="mb-8 max-w-md">
+                    <div class="inline-block p-4 rounded-full bg-cyan-50 text-cyan-600 mb-6 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-3">Select a Domain</h2>
+                    <p class="text-slate-500 mb-8">Practice real-world math and statistical analysis.</p>
+                    
+                    <div class="relative text-left">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Current Module</label>
+                        <select id="topic-selector" class="block w-full bg-slate-50 border border-slate-300 text-slate-700 py-4 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-cyan-500 shadow-sm text-lg cursor-pointer">
+                            <option value="ratios">1. Ratios, Rates & Percentages</option>
+                            <option value="data">2. Data Analysis & Statistics</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 pt-6 text-slate-500">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="w-full max-w-xs bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition hover:scale-[1.02] flex items-center justify-center gap-2">
+                    <span>Start Practice</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 2. QUIZ INTERFACE -->
+            <div id="quiz-interface" class="absolute inset-0 hidden flex flex-col bg-white z-20">
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 h-1">
+                    <div id="progress-bar" class="bg-cyan-500 h-1 transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Scrollable Content -->
+                <div class="flex-1 overflow-y-auto p-6 md:p-10 pb-20">
+                    <!-- Question Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
+                            Q<span id="current-q-num">1</span> <span class="text-slate-300 mx-1">/</span> <span id="total-q-num">15</span>
+                        </span>
+                        <button onclick="toggleHint()" class="text-sm text-cyan-600 hover:text-cyan-800 font-medium flex items-center gap-1 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Hint
+                        </button>
+                    </div>
+
+                    <!-- Hint Box -->
+                    <div id="hint-box" class="hidden bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded text-sm text-amber-800 fade-in shadow-sm">
+                        <span class="font-bold block mb-1">💡 Hint</span> 
+                        <span id="hint-text"></span>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div id="question-text" class="text-xl md:text-2xl font-medium text-slate-800 mb-8 leading-relaxed"></div>
+
+                    <!-- Options Grid -->
+                    <div id="options-container" class="grid gap-4 max-w-2xl mx-auto">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div id="feedback-section" class="hidden mt-8 pt-6 border-t border-slate-100 fade-in bg-slate-50 rounded-xl p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div id="feedback-icon" class="rounded-full p-1"></div>
+                            <div id="feedback-header" class="font-bold text-lg"></div>
+                        </div>
+                        <div id="feedback-rationale" class="text-slate-600 text-base leading-relaxed mb-6 pl-1"></div>
+                        <button id="next-btn" onclick="nextQuestion()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                            Next Question
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. RESULTS SCREEN -->
+            <div id="results-screen" class="absolute inset-0 hidden p-8 overflow-y-auto bg-slate-50 z-30 flex flex-col items-center">
+                <div class="text-center w-full max-w-2xl">
+                    <div class="mb-2 text-cyan-600 font-bold uppercase tracking-widest text-xs">Topic Complete</div>
+                    <h2 id="result-title" class="text-3xl font-bold mb-6 text-slate-900">Summary</h2>
+                    
+                    <!-- Score Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col items-center">
+                        <div class="text-6xl font-black text-slate-800 mb-2">
+                            <span id="final-score">0</span><span class="text-3xl text-slate-400 font-medium">/15</span>
+                        </div>
+                        <div id="final-percent" class="text-sm font-bold bg-cyan-100 text-cyan-700 px-3 py-1 rounded-full mb-4">0%</div>
+                        <p id="final-message" class="text-slate-600">Loading...</p>
+                    </div>
+
+                    <div class="text-left w-full">
+                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            Detailed Analysis
+                        </h3>
+                        <div id="analysis-content" class="space-y-4 text-sm text-slate-600 pb-12">
+                            <!-- Analysis Items -->
+                        </div>
+                    </div>
+
+                    <!-- Fixed Bottom Bar for Results -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-slate-200 flex justify-center md:absolute md:bottom-auto md:relative md:bg-transparent md:border-0 md:p-0">
+                        <button onclick="goHome()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg w-full md:w-auto">
+                            Finish & Choose New Topic
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- APP LOGIC -->
+    <script>
+        const masterData = {
+            ratios: [
+                {
+                    q: "A map has a scale of 1 inch = 50 miles. If two cities are 3.5 inches apart on the map, how far apart are they in reality?",
+                    options: ["175 miles", "150 miles", "125 miles", "200 miles"],
+                    correct: 0,
+                    rationale: "$3.5 \\text{ inches} \\times 50 \\text{ miles/inch} = 175 \\text{ miles}$.",
+                    hint: "Multiply the map distance by the scale factor."
+                },
+                {
+                    q: "A car travels 240 miles in 4 hours. What is the unit rate in miles per hour?",
+                    options: ["60 mph", "50 mph", "70 mph", "80 mph"],
+                    correct: 0,
+                    rationale: "Unit rate = $\\frac{240 \\text{ miles}}{4 \\text{ hours}} = 60 \\text{ mph}$.",
+                    hint: "Divide distance by time."
+                },
+                {
+                    q: "If 15% of a number is 45, what is the number?",
+                    options: ["300", "30", "450", "350"],
+                    correct: 0,
+                    rationale: "$0.15x = 45 \\rightarrow x = 45 / 0.15 = 300$.",
+                    hint: "Set up the equation $0.15x = 45$."
+                },
+                {
+                    q: "A recipe requires 2 cups of flour for every 3 cups of sugar. If you use 9 cups of sugar, how much flour do you need?",
+                    options: ["6 cups", "4.5 cups", "3 cups", "13.5 cups"],
+                    correct: 0,
+                    rationale: "Ratio Flour:Sugar = 2:3. Sugar multiplied by 3 ($3 \\to 9$), so multiply flour by 3: $2 \\times 3 = 6$.",
+                    hint: "Set up a proportion: $\\frac{2}{3} = \\frac{x}{9}$."
+                },
+                {
+                    q: "A shirt originally costs &#36;40. It is on sale for 20% off. What is the sale price?",
+                    options: ["&#36;32", "&#36;30", "&#36;8", "&#36;38"],
+                    correct: 0,
+                    rationale: "Discount: $40 \\times 0.20 = 8$. Price: $40 - 8 = 32$.",
+                    hint: "Calculate the discount amount first, then subtract from original price."
+                },
+                {
+                    q: "The population of a town increased from 10,000 to 12,000. What was the percent increase?",
+                    options: ["20%", "25%", "12%", "2%"],
+                    correct: 0,
+                    rationale: "Change = 2000. $\\frac{2000}{10000} = 0.20 = 20\\%$.",
+                    hint: "$\\frac{\\text{New} - \\text{Old}}{\\text{Old}} \\times 100$."
+                },
+                {
+                    q: "A machine produces 150 widgets in 30 minutes. What is the rate in widgets per hour?",
+                    options: ["300", "75", "150", "450"],
+                    correct: 0,
+                    rationale: "30 minutes is 0.5 hours. Rate = $150 / 0.5 = 300$. Or double the 30-min production.",
+                    hint: "Convert 30 minutes to hours first."
+                },
+                {
+                    q: "Density = Mass/Volume. If mass is 50g and volume is 10cm$^3$, what is density?",
+                    options: ["5 g/cm$^3$", "0.2 g/cm$^3$", "500 g/cm$^3$", "40 g/cm$^3$"],
+                    correct: 0,
+                    rationale: "Density = $50 / 10 = 5$.",
+                    hint: "Divide mass by volume."
+                },
+                {
+                    q: "If $y$ is directly proportional to $x$, and $y=12$ when $x=4$, find $y$ when $x=10$.",
+                    options: ["30", "48", "24", "40"],
+                    correct: 0,
+                    rationale: "$y = kx \\rightarrow 12 = k(4) \\rightarrow k=3$. So $y = 3(10) = 30$.",
+                    hint: "Find the constant of proportionality first."
+                },
+                {
+                    q: "A runner covers 100 meters in 12.5 seconds. What is the average speed?",
+                    options: ["8 m/s", "10 m/s", "12 m/s", "6 m/s"],
+                    correct: 0,
+                    rationale: "$100 / 12.5 = 8$.",
+                    hint: "Distance divided by time."
+                },
+                {
+                    q: "Currency exchange: 1 USD = 0.85 EUR. How many EUR is 200 USD?",
+                    options: ["170 EUR", "235 EUR", "185 EUR", "160 EUR"],
+                    correct: 0,
+                    rationale: "$200 \\times 0.85 = 170$.",
+                    hint: "Multiply USD amount by the exchange rate."
+                },
+                {
+                    q: "Ratio of red:blue marbles is 3:5. If there are 40 marbles total, how many are red?",
+                    options: ["15", "25", "10", "24"],
+                    correct: 0,
+                    rationale: "Total parts = $3+5=8$. Each part = $40/8=5$. Red = $3 \\times 5 = 15$.",
+                    hint: "Sum the ratio parts first."
+                },
+                {
+                    q: "Convert 60 feet per second to yards per minute. (1 yard = 3 feet)",
+                    options: ["1200 yards/min", "3600 yards/min", "20 yards/min", "1800 yards/min"],
+                    correct: 0,
+                    rationale: "$\\frac{60 \\text{ ft}}{\\text{sec}} \\times \\frac{1 \\text{ yd}}{3 \\text{ ft}} \\times \\frac{60 \\text{ sec}}{1 \\text{ min}} = 20 \\times 60 = 1200$.",
+                    hint: "Use unit analysis: convert ft to yards (divide by 3), seconds to minutes (multiply by 60)."
+                },
+                {
+                    q: "Investment of &#36;1000 earns 5% simple interest per year. Value after 3 years?",
+                    options: ["&#36;1150", "&#36;1050", "&#36;1157", "&#36;1500"],
+                    correct: 0,
+                    rationale: "Interest = $1000 \\times 0.05 \\times 3 = 150$. Total = $1000 + 150 = 1150$.",
+                    hint: "Interest = Principal $\\times$ Rate $\\times$ Time."
+                },
+                {
+                    q: "John can paint a room in 4 hours. Mary in 2 hours. How long together?",
+                    options: ["1.33 hours", "3 hours", "6 hours", "0.75 hours"],
+                    correct: 0,
+                    rationale: "Rate = $\\frac{1}{4} + \\frac{1}{2} = \\frac{1}{4} + \\frac{2}{4} = \\frac{3}{4}$. Time = $1 / (3/4) = 4/3 = 1.33$.",
+                    hint: "Add their rates ($\frac{1}{A} + \frac{1}{B}$), then take the reciprocal."
+                }
+            ],
+            data: [
+                {
+                    q: "Find the median of the data set: {4, 8, 2, 9, 5}.",
+                    options: ["5", "4", "5.6", "8"],
+                    correct: 0,
+                    rationale: "Order the set: {2, 4, 5, 8, 9}. The middle number is 5.",
+                    hint: "Sort the numbers from smallest to largest first."
+                },
+                {
+                    q: "What is the range of this set: {10, 3, 8, 15, 2}?",
+                    options: ["13", "12", "15", "5"],
+                    correct: 0,
+                    rationale: "Range = Max - Min = $15 - 2 = 13$.",
+                    hint: "Subtract the smallest number from the largest."
+                },
+                {
+                    q: "A data set has a standard deviation of 0. What does this mean?",
+                    options: ["All values are identical", "The mean is 0", "The values are spread out", "There is no mode"],
+                    correct: 0,
+                    rationale: "Standard deviation measures spread. Zero spread means no variation.",
+                    hint: "How spread out are the numbers if deviation is zero?"
+                },
+                {
+                    q: "Based on the table, what is the probability of selecting a Red ball?<br><table class='data-table'><tr><th>Color</th><th>Count</th></tr><tr><td>Red</td><td>5</td></tr><tr><td>Blue</td><td>3</td></tr><tr><td>Green</td><td>2</td></tr></table>",
+                    options: ["0.5", "0.2", "0.3", "0.8"],
+                    correct: 0,
+                    rationale: "Total = $5+3+2=10$. Probability(Red) = $5/10 = 0.5$.",
+                    hint: "Divide count of Red by the Total count."
+                },
+                {
+                    q: "What is the mode of the set: {1, 2, 2, 3, 4, 4, 4, 5}?",
+                    options: ["4", "2", "3.1", "5"],
+                    correct: 0,
+                    rationale: "Mode is the most frequent number. 4 appears three times.",
+                    hint: "Which number appears most often?"
+                },
+                {
+                    q: "If the mean of $x, 5, 8$ is 6, what is $x$?",
+                    options: ["5", "6", "4", "7"],
+                    correct: 0,
+                    rationale: "$(x + 5 + 8) / 3 = 6 \\rightarrow x + 13 = 18 \\rightarrow x = 5$.",
+                    hint: "Set up average formula: sum / 3 = 6."
+                },
+                {
+                    q: "Which correlation coefficient represents the strongest relationship?",
+                    options: ["-0.9", "0.8", "0.1", "0"],
+                    correct: 0,
+                    rationale: "Strength is based on absolute value. $|-0.9| = 0.9$ is closest to 1.",
+                    hint: "Closest to 1 or -1 is strongest."
+                },
+                {
+                    q: "The mean of a data set is greater than the median. The distribution is likely:",
+                    options: ["Skewed Right (Positively)", "Skewed Left (Negatively)", "Symmetric", "Normal"],
+                    correct: 0,
+                    rationale: "High outliers pull the mean up (right).",
+                    hint: "Outliers pull the mean towards the tail."
+                },
+                {
+                    q: "Survey of 500 people has a margin of error of 4%. If 52% say Yes, the true range is likely:",
+                    options: ["48% to 56%", "50% to 54%", "4% to 52%", "0% to 100%"],
+                    correct: 0,
+                    rationale: "Range = Value $\\pm$ Margin. $52 - 4 = 48$ and $52 + 4 = 56$.",
+                    hint: "Add and subtract the margin of error from the observed value."
+                },
+                {
+                    q: "Find the mean of the frequency table:<br><table class='data-table'><tr><th>Value</th><th>Freq</th></tr><tr><td>1</td><td>2</td></tr><tr><td>2</td><td>3</td></tr></table>",
+                    options: ["1.6", "1.5", "2", "2.5"],
+                    correct: 0,
+                    rationale: "Sum = $(1\\times2) + (2\\times3) = 2 + 6 = 8$. Total freq = $2+3=5$. Mean = $8/5 = 1.6$.",
+                    hint: "Multiply value by frequency, sum them, divide by total items."
+                },
+                {
+                    q: "A scatterplot showing height vs age for children has points going up from left to right. This is:",
+                    options: ["Positive correlation", "Negative correlation", "No correlation", "Non-linear"],
+                    correct: 0,
+                    rationale: "As age increases, height increases. Both variables go up together.",
+                    hint: "If y goes up as x goes up, it is positive."
+                },
+                {
+                    q: "Given P(A) = 0.4, P(B) = 0.5. If A and B are independent, what is P(A and B)?",
+                    options: ["0.2", "0.9", "0.1", "0.5"],
+                    correct: 0,
+                    rationale: "For independent events, $P(A \\text{ and } B) = P(A) \\times P(B) = 0.4 \\times 0.5 = 0.2$.",
+                    hint: "Multiply the probabilities."
+                },
+                {
+                    q: "Line of best fit: $y = 2.5x + 10$. If $x$ increases by 2, how much does $y$ increase?",
+                    options: ["5", "2.5", "10", "20"],
+                    correct: 0,
+                    rationale: "Slope is 2.5. Increase = Slope $\\times$ Change in x = $2.5 \\times 2 = 5$.",
+                    hint: "Multiply the slope by the change in x."
+                },
+                {
+                    q: "Which sampling method is most biased for 'Favorite School Sport'?",
+                    options: ["Asking the football team", "Randomly selecting ID numbers", "Every 10th student at entrance", "Picking names from hat"],
+                    correct: 0,
+                    rationale: "Football players will likely prefer football, creating bias. Others are random.",
+                    hint: "Look for the group that is not representative of the whole population."
+                },
+                {
+                    q: "In a box plot, the line inside the box represents the:",
+                    options: ["Median", "Mean", "Mode", "Range"],
+                    correct: 0,
+                    rationale: "The center line of a box-and-whisker plot marks the median.",
+                    hint: "It divides the data in half."
+                }
+            ]
+        };
+
+        // --- STATE & UTILS ---
+        let currentTopic = 'ratios';
+        let currentQIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let isAnswered = false;
+
+        const els = {
+            app: document.getElementById('app'),
+            screens: {
+                start: document.getElementById('start-screen'),
+                quiz: document.getElementById('quiz-interface'),
+                results: document.getElementById('results-screen')
+            },
+            homeBtn: document.getElementById('home-btn'),
+            selector: document.getElementById('topic-selector'),
+            progress: document.getElementById('progress-bar'),
+            qNum: document.getElementById('current-q-num'),
+            totalQ: document.getElementById('total-q-num'),
+            qText: document.getElementById('question-text'),
+            options: document.getElementById('options-container'),
+            hintBox: document.getElementById('hint-box'),
+            hintText: document.getElementById('hint-text'),
+            feedback: document.getElementById('feedback-section'),
+            feedbackHeader: document.getElementById('feedback-header'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            feedbackRationale: document.getElementById('feedback-rationale'),
+            nextBtn: document.getElementById('next-btn'),
+            results: {
+                title: document.getElementById('result-title'),
+                score: document.getElementById('final-score'),
+                percent: document.getElementById('final-percent'),
+                msg: document.getElementById('final-message'),
+                analysis: document.getElementById('analysis-content')
+            }
+        };
+
+        function initMath() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "$", right: "$", display: false}
+                    ]
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initMath);
+
+        function goHome() {
+            showScreen('start');
+            els.homeBtn.classList.add('hidden');
+        }
+
+        function showScreen(name) {
+            Object.values(els.screens).forEach(s => s.classList.add('hidden'));
+            els.screens[name].classList.remove('hidden');
+        }
+
+        function startQuiz() {
+            currentTopic = els.selector.value;
+            currentQIndex = 0;
+            score = 0;
+            userAnswers = [];
+            isAnswered = false;
+            els.totalQ.textContent = masterData[currentTopic].length;
+            showScreen('quiz');
+            els.homeBtn.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            isAnswered = false;
+            els.feedback.classList.add('hidden');
+            els.hintBox.classList.add('hidden');
+
+            const data = masterData[currentTopic];
+            const q = data[currentQIndex];
+
+            const progressPct = (currentQIndex / data.length) * 100;
+            els.progress.style.width = `${progressPct}%`;
+            els.qNum.textContent = currentQIndex + 1;
+
+            els.qText.innerHTML = q.q;
+            els.hintText.innerHTML = q.hint;
+
+            // Simple shuffle
+            const indices = q.options.map((_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+
+            els.options.innerHTML = '';
+            indices.forEach(i => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-5 rounded-xl border-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 transition bg-white shadow-sm flex items-center group";
+                btn.innerHTML = `
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold text-sm mr-4 group-hover:bg-cyan-200 group-hover:text-cyan-700 transition">${String.fromCharCode(65 + indices.indexOf(i))}</span>
+                    <span class="text-lg text-slate-700 flex-1">${q.options[i]}</span>
+                `;
+                btn.onclick = () => checkAnswer(i, btn, indices);
+                els.options.appendChild(btn);
+            });
+
+            els.nextBtn.innerHTML = (currentQIndex === data.length - 1) 
+                ? 'Finish Practice'
+                : 'Next Question';
+
+            initMath();
+        }
+
+        function toggleHint() {
+            els.hintBox.classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedIndex, btn, indices) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const data = masterData[currentTopic];
+            const q = data[currentQIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            if (isCorrect) score++;
+            userAnswers.push({ qIndex: currentQIndex, correct: isCorrect, selected: selectedIndex });
+
+            const buttons = els.options.children;
+            Array.from(buttons).forEach((b, idx) => {
+                b.disabled = true;
+                b.classList.remove('hover:border-cyan-500', 'hover:bg-cyan-50');
+                const realIndex = indices[idx];
+                
+                if (realIndex === q.correct) {
+                    b.classList.add('border-green-500', 'bg-green-50');
+                    b.querySelector('span:first-child').classList.add('bg-green-200', 'text-green-800');
+                } else if (b === btn && !isCorrect) {
+                    b.classList.add('border-red-500', 'bg-red-50');
+                    b.querySelector('span:first-child').classList.add('bg-red-200', 'text-red-800');
+                } else {
+                    b.classList.add('opacity-50');
+                }
+            });
+
+            els.feedback.classList.remove('hidden');
+            els.feedbackIcon.className = isCorrect ? "rounded-full p-1 bg-green-100 text-green-600" : "rounded-full p-1 bg-red-100 text-red-600";
+            els.feedbackIcon.innerHTML = isCorrect 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+            
+            els.feedbackHeader.textContent = isCorrect ? "Correct!" : "Incorrect";
+            els.feedbackHeader.className = isCorrect ? "font-bold text-lg text-green-700" : "font-bold text-lg text-red-700";
+            els.feedbackRationale.innerHTML = q.rationale;
+            
+            els.feedback.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            initMath();
+        }
+
+        function nextQuestion() {
+            const data = masterData[currentTopic];
+            if (currentQIndex < data.length - 1) {
+                currentQIndex++;
+                renderQuestion();
+                els.screens.quiz.querySelector('.overflow-y-auto').scrollTop = 0;
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            const data = masterData[currentTopic];
+            showScreen('results');
+            els.homeBtn.classList.add('hidden');
+
+            const pct = Math.round((score / data.length) * 100);
+            
+            els.results.score.textContent = score;
+            els.results.percent.textContent = `${pct}%`;
+            
+            let msg = "";
+            if (pct >= 90) msg = "Excellent! You've mastered this topic.";
+            else if (pct >= 70) msg = "Great job! Review your mistakes to get perfect.";
+            else msg = "Good practice. Keep reviewing the concepts.";
+            els.results.msg.textContent = msg;
+
+            els.results.analysis.innerHTML = '';
+            
+            data.forEach((q, idx) => {
+                const ua = userAnswers.find(a => a.qIndex === idx);
+                const isCorrect = ua ? ua.correct : false;
+                
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`;
+                
+                item.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 min-w-[24px]">
+                            ${isCorrect 
+                                ? '<div class="w-6 h-6 rounded-full bg-green-200 text-green-700 flex items-center justify-center font-bold text-xs">✓</div>' 
+                                : '<div class="w-6 h-6 rounded-full bg-red-200 text-red-700 flex items-center justify-center font-bold text-xs">✗</div>'
+                            }
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-slate-800 font-medium mb-1">Q${idx + 1}: ${q.q}</div>
+                            ${!isCorrect ? `<div class="text-xs text-red-600 font-bold uppercase mb-1">Correct Answer: ${q.options[q.correct]}</div>` : ''}
+                            <div class="text-slate-600 text-sm mt-2 border-t ${isCorrect ? 'border-green-200' : 'border-red-200'} pt-2">
+                                <span class="font-bold text-xs uppercase opacity-70">Explanation:</span> ${q.rationale}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                els.results.analysis.appendChild(item);
+            });
+            
+            initMath();
+        }
+    </script>
+</body>
+</html>

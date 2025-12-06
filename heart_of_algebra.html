@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Heart of Algebra Master</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    
+    <style>
+        .option-btn { transition: all 0.2s; }
+        .option-btn:hover { transform: translateY(-1px); }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        select { -webkit-appearance: none; appearance: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div id="app" class="w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col" style="min-height: 600px;">
+        
+        <!-- Header -->
+        <header class="bg-rose-700 text-white p-6 shadow-md z-10">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Heart of Algebra</h1>
+                    <p class="text-rose-200 text-sm">SAT Math Practice</p>
+                </div>
+                <!-- Home Button (Hidden on Start Screen) -->
+                <button id="home-btn" onclick="goHome()" class="hidden text-xs bg-rose-600 hover:bg-rose-500 py-1 px-3 rounded border border-rose-500 transition">
+                    Change Topic
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 relative bg-white">
+            
+            <!-- 1. TOPIC SELECTION SCREEN -->
+            <div id="start-screen" class="absolute inset-0 p-8 flex flex-col items-center justify-center text-center fade-in z-0 overflow-y-auto">
+                <div class="mb-8 max-w-md">
+                    <div class="inline-block p-4 rounded-full bg-rose-50 text-rose-600 mb-6 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-3">Select a Focus Area</h2>
+                    <p class="text-slate-500 mb-8">Master linear equations, inequalities, and systems.</p>
+                    
+                    <div class="relative text-left">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Current Module</label>
+                        <select id="topic-selector" class="block w-full bg-slate-50 border border-slate-300 text-slate-700 py-4 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-rose-500 shadow-sm text-lg cursor-pointer">
+                            <option value="contexts">1. Equations & Inequalities in Context</option>
+                            <option value="solving">2. Solving Variables & Systems</option>
+                            <option value="relationships">3. Linear Relationships & Graphs</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 pt-6 text-slate-500">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="w-full max-w-xs bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform transition hover:scale-[1.02] flex items-center justify-center gap-2">
+                    <span>Start Practice</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 2. QUIZ INTERFACE -->
+            <div id="quiz-interface" class="absolute inset-0 hidden flex flex-col bg-white z-20">
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 h-1">
+                    <div id="progress-bar" class="bg-rose-500 h-1 transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Scrollable Content -->
+                <div class="flex-1 overflow-y-auto p-6 md:p-10 pb-20">
+                    <!-- Question Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
+                            Q<span id="current-q-num">1</span> <span class="text-slate-300 mx-1">/</span> <span id="total-q-num">15</span>
+                        </span>
+                        <button onclick="toggleHint()" class="text-sm text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Hint
+                        </button>
+                    </div>
+
+                    <!-- Hint Box -->
+                    <div id="hint-box" class="hidden bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded text-sm text-amber-800 fade-in shadow-sm">
+                        <span class="font-bold block mb-1">💡 Hint</span> 
+                        <span id="hint-text"></span>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div id="question-text" class="text-xl md:text-2xl font-medium text-slate-800 mb-8 leading-relaxed"></div>
+
+                    <!-- Options Grid -->
+                    <div id="options-container" class="grid gap-4 max-w-2xl mx-auto">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div id="feedback-section" class="hidden mt-8 pt-6 border-t border-slate-100 fade-in bg-slate-50 rounded-xl p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div id="feedback-icon" class="rounded-full p-1"></div>
+                            <div id="feedback-header" class="font-bold text-lg"></div>
+                        </div>
+                        <div id="feedback-rationale" class="text-slate-600 text-base leading-relaxed mb-6 pl-1"></div>
+                        <button id="next-btn" onclick="nextQuestion()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                            Next Question
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. RESULTS SCREEN -->
+            <div id="results-screen" class="absolute inset-0 hidden p-8 overflow-y-auto bg-slate-50 z-30 flex flex-col items-center">
+                <div class="text-center w-full max-w-2xl">
+                    <div class="mb-2 text-rose-600 font-bold uppercase tracking-widest text-xs">Topic Complete</div>
+                    <h2 id="result-title" class="text-3xl font-bold mb-6 text-slate-900">Summary</h2>
+                    
+                    <!-- Score Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8 flex flex-col items-center">
+                        <div class="text-6xl font-black text-slate-800 mb-2">
+                            <span id="final-score">0</span><span class="text-3xl text-slate-400 font-medium">/15</span>
+                        </div>
+                        <div id="final-percent" class="text-sm font-bold bg-rose-100 text-rose-700 px-3 py-1 rounded-full mb-4">0%</div>
+                        <p id="final-message" class="text-slate-600">Loading...</p>
+                    </div>
+
+                    <div class="text-left w-full">
+                        <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            Detailed Analysis
+                        </h3>
+                        <div id="analysis-content" class="space-y-4 text-sm text-slate-600 pb-12">
+                            <!-- Analysis Items -->
+                        </div>
+                    </div>
+
+                    <!-- Fixed Bottom Bar for Results -->
+                    <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-slate-200 flex justify-center md:absolute md:bottom-auto md:relative md:bg-transparent md:border-0 md:p-0">
+                        <button onclick="goHome()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg w-full md:w-auto">
+                            Finish & Choose New Topic
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- APP LOGIC -->
+    <script>
+        const masterData = {
+            contexts: [
+                {
+                    q: "A painter charges &#36;150 for materials and &#36;45 per hour of labor. Which equation represents the total cost, $C$, for a job that takes $h$ hours?",
+                    options: ["$C = 45h + 150$", "$C = 150h + 45$", "$C = 45h - 150$", "$C = 195h$"],
+                    correct: 0,
+                    rationale: "Fixed cost (materials) is 150. Variable cost is 45 per hour ($45h$). Total = $45h + 150$.",
+                    hint: "Identify the fixed value (y-intercept) and the rate of change (slope)."
+                },
+                {
+                    q: "In $A = 500 + 20w$, if $A$ is the total amount in a savings account after $w$ weeks, what does 20 represent?",
+                    options: ["The amount saved each week", "The initial amount", "The total weeks", "The total amount"],
+                    correct: 0,
+                    rationale: "20 is the coefficient of $w$, representing the rate of change (slope): 20 dollars per week.",
+                    hint: "The number multiplied by the variable represents the rate of change."
+                },
+                {
+                    q: "Maria buys $x$ books at &#36;12 each and $y$ magazines at &#36;5 each. She spends at most &#36;60. Which inequality represents this?",
+                    options: ["$12x + 5y \\le 60$", "$12x + 5y \\ge 60$", "$5x + 12y \\le 60$", "$12x - 5y \\le 60$"],
+                    correct: 0,
+                    rationale: "Total cost is sum of individual costs. 'At most' means less than or equal to ($\\le$).",
+                    hint: "Total Cost = (Price A $\\times$ Qty A) + (Price B $\\times$ Qty B)."
+                },
+                {
+                    q: "A tree is 5 feet tall and grows 8 inches per year. Which equation models height $h$ (in feet) after $t$ years?",
+                    options: ["$h = 5 + \\frac{2}{3}t$", "$h = 5 + 8t$", "$h = 8 + 5t$", "$h = 5 + 12t$"],
+                    correct: 0,
+                    rationale: "Must match units! 8 inches = $8/12$ feet = $2/3$ feet. So slope is $2/3$.",
+                    hint: "Convert the growth rate to feet so it matches the initial height."
+                },
+                {
+                    q: "A gym charges a &#36;50 fee plus &#36;10/month. Another charges &#36;100 fee plus &#36;5/month. When are costs equal?",
+                    options: ["$50 + 10m = 100 + 5m$", "$50m + 10 = 100m + 5$", "$50 + 5m = 100 + 10m$", "$10m - 50 = 5m - 100$"],
+                    correct: 0,
+                    rationale: "Set the cost equations equal: Cost1 = $50 + 10m$, Cost2 = $100 + 5m$.",
+                    hint: "Write an expression for the total cost of each gym and set them equal."
+                },
+                {
+                    q: "A car rental is &#36;30/day plus &#36;0.15/mile. If you rent for 2 days and drive $m$ miles, what is the cost $C$?",
+                    options: ["$C = 60 + 0.15m$", "$C = 30 + 0.15m$", "$C = 60 + 0.30m$", "$C = 30m + 0.15$"],
+                    correct: 0,
+                    rationale: "Fixed cost for 2 days is $2 \\times 30 = 60$. Mileage cost is $0.15m$.",
+                    hint: "Calculate the fixed daily cost for the total number of days first."
+                },
+                {
+                    q: "If $y = kx$ where $k$ is a constant and $y=24$ when $x=6$, what is value of $y$ when $x=5$?",
+                    options: ["20", "15", "4", "30"],
+                    correct: 0,
+                    rationale: "Find k: $24 = k(6) \\rightarrow k=4$. Equation is $y=4x$. When $x=5, y=4(5)=20$.",
+                    hint: "Find the constant of proportionality $k$ first."
+                },
+                {
+                    q: "In the equation $n = 456 - 3t$, if $n$ is number of apples remaining after $t$ hours, what does 456 mean?",
+                    options: ["Initial number of apples", "Apples sold per hour", "Total hours", "Apples remaining"],
+                    correct: 0,
+                    rationale: "456 is the constant (y-intercept), representing the value when $t=0$ (start).",
+                    hint: "What is the value of $n$ when time $t=0$?"
+                },
+                {
+                    q: "A full 15-gallon gas tank loses 2 gallons per hour of driving. Equation for gallons $g$ left after $t$ hours?",
+                    options: ["$g = 15 - 2t$", "$g = 15 + 2t$", "$g = 2t - 15$", "$g = 2 - 15t$"],
+                    correct: 0,
+                    rationale: "Start at 15, decrease (subtract) by 2 for every hour.",
+                    hint: "Decrease means subtraction from the initial amount."
+                },
+                {
+                    q: "A student needs at least 70% average on 2 tests. First score is $x$, second is $y$. Inequality?",
+                    options: ["$\\frac{x+y}{2} \\ge 70$", "$x+y \\ge 70$", "$\\frac{x+y}{2} \\le 70$", "$x+y \\le 140$"],
+                    correct: 0,
+                    rationale: "Average is sum divided by count. Average must be greater than or equal to 70.",
+                    hint: "Write the formula for the average of two numbers."
+                },
+                {
+                    q: "Cost $C$ of printing $n$ flyers is $C = 50 + 0.1n$. What represents the 0.1?",
+                    options: ["Cost per flyer", "Setup fee", "Total cost", "Number of flyers"],
+                    correct: 0,
+                    rationale: "0.1 is the coefficient of $n$, so it's the variable cost per unit.",
+                    hint: "Slope represents the rate of change per unit."
+                },
+                {
+                    q: "A store sells hats ($h$) for &#36;10 and shirts ($s$) for &#36;20. Goal: sales > &#36;500. Inequality?",
+                    options: ["$10h + 20s > 500$", "$10h + 20s < 500$", "$20h + 10s > 500$", "$h + s > 500$"],
+                    correct: 0,
+                    rationale: "Revenue is price $\\times$ quantity. Sum of revenues must exceed 500.",
+                    hint: "Match the prices to the correct items."
+                },
+                {
+                    q: "Tickets: Adults &#36;10, Kids &#36;5. Total 100 tickets sold for &#36;800. System?",
+                    options: ["$a+k=100; 10a+5k=800$", "$a+k=800; 10a+5k=100$", "$a+k=100; 5a+10k=800$", "$a=k+100; 10a+5k=800$"],
+                    correct: 0,
+                    rationale: "Equation 1 (Quantity): $a+k=100$. Equation 2 (Value): $10a+5k=800$.",
+                    hint: "One equation for the *count* of tickets, one for the *cost*."
+                },
+                {
+                    q: "Temperature $T$ drops $3^\\circ$ per hour from $60^\\circ$. After how many hours is $T < 30$?",
+                    options: ["$60 - 3h < 30$", "$60 - 3h > 30$", "$30 - 3h < 60$", "$3h - 60 < 30$"],
+                    correct: 0,
+                    rationale: "Start at 60, subtract $3h$. We want this value to be less than 30.",
+                    hint: "Write the expression for temp after h hours, set it < 30."
+                },
+                {
+                    q: "In $y = mx + b$, if $y$ represents total distance and $x$ represents time, what is $m$?",
+                    options: ["Speed", "Starting position", "Time", "Acceleration"],
+                    correct: 0,
+                    rationale: "Slope of distance vs time is rate of change, which is speed.",
+                    hint: "Change in distance divided by change in time."
+                }
+            ],
+            solving: [
+                {
+                    q: "Solve for $x$: $3x + 4 = 19$.",
+                    options: ["$5$", "$4$", "$6$", "$3$"],
+                    correct: 0,
+                    rationale: "Subtract 4: $3x = 15$. Divide by 3: $x = 5$.",
+                    hint: "Isolate x using inverse operations."
+                },
+                {
+                    q: "Solve the system: $x + y = 10$, $x - y = 2$.",
+                    options: ["$x=6, y=4$", "$x=5, y=5$", "$x=4, y=6$", "$x=8, y=2$"],
+                    correct: 0,
+                    rationale: "Add equations: $2x = 12 \\rightarrow x=6$. Sub into first: $6+y=10 \\rightarrow y=4$.",
+                    hint: "Add the two equations together (elimination)."
+                },
+                {
+                    q: "Solve for $x$: $2(x - 3) = 4x - 10$.",
+                    options: ["$2$", "$1$", "$4$", "$3$"],
+                    correct: 0,
+                    rationale: "$2x - 6 = 4x - 10 \\rightarrow -6 = 2x - 10 \\rightarrow 4 = 2x \\rightarrow x=2$.",
+                    hint: "Distribute the 2 first."
+                },
+                {
+                    q: "If $3x + 2y = 12$ and $y = x + 1$, find $x$.",
+                    options: ["$2$", "$4$", "$3$", "$1$"],
+                    correct: 0,
+                    rationale: "Substitute $y$: $3x + 2(x+1) = 12 \\rightarrow 3x + 2x + 2 = 12 \\rightarrow 5x = 10 \\rightarrow x=2$.",
+                    hint: "Substitute $(x+1)$ for $y$ in the first equation."
+                },
+                {
+                    q: "Solve $-3x > 12$.",
+                    options: ["$x < -4$", "$x > -4$", "$x < 4$", "$x > 4$"],
+                    correct: 0,
+                    rationale: "Divide by -3. Remember to **flip** the inequality sign: $x < -4$.",
+                    hint: "When multiplying/dividing by a negative, flip the sign."
+                },
+                {
+                    q: "Solve for $L$: $P = 2L + 2W$.",
+                    options: ["$L = \\frac{P - 2W}{2}$", "$L = P - W$", "$L = \\frac{P}{2} - 2W$", "$L = P - 2W$"],
+                    correct: 0,
+                    rationale: "Subtract $2W$: $P - 2W = 2L$. Divide by 2: $L = (P - 2W)/2$.",
+                    hint: "Treat W and P as numbers and isolate L."
+                },
+                {
+                    q: "How many solutions for $3x + 5 = 3x + 2$?",
+                    options: ["No solution", "One solution", "Infinite solutions", "Two solutions"],
+                    correct: 0,
+                    rationale: "Subtract $3x$ from both sides: $5 = 2$. False statement means no solution.",
+                    hint: "Do the variable terms cancel out? Is the remaining statement true or false?"
+                },
+                {
+                    q: "How many solutions for $2(x + 1) = 2x + 2$?",
+                    options: ["Infinite solutions", "No solution", "One solution", "Zero"],
+                    correct: 0,
+                    rationale: "$2x + 2 = 2x + 2$. True statement ($0=0$) means infinite solutions.",
+                    hint: "If the equation simplifies to a true statement like $5=5$, it's infinite."
+                },
+                {
+                    q: "Solve $\\frac{1}{2}x - 3 = 5$.",
+                    options: ["$16$", "$4$", "$8$", "$12$"],
+                    correct: 0,
+                    rationale: "Add 3: $0.5x = 8$. Multiply by 2: $x = 16$.",
+                    hint: "Isolate the term with $x$ first."
+                },
+                {
+                    q: "If $4x = 12$, what is value of $2x - 1$?",
+                    options: ["$5$", "$3$", "$6$", "$2$"],
+                    correct: 0,
+                    rationale: "Solve for $x$: $x=3$. Substitute: $2(3) - 1 = 5$.",
+                    hint: "Find x first, then calculate the expression."
+                },
+                {
+                    q: "System: $2x - y = 4$, $4x - 2y = 8$.",
+                    options: ["Infinite solutions", "No solution", "$(2, 0)$", "$(4, 4)$"],
+                    correct: 0,
+                    rationale: "Divide second eq by 2: $2x - y = 4$. Same equation means infinite solutions.",
+                    hint: "Are the lines parallel, intersecting, or identical?"
+                },
+                {
+                    q: "Solve $5x - (x + 2) = 10$.",
+                    options: ["$3$", "$2$", "$4$", "$1$"],
+                    correct: 0,
+                    rationale: "Distribute negative: $5x - x - 2 = 10 \\rightarrow 4x - 2 = 10 \\rightarrow 4x = 12 \\rightarrow x=3$.",
+                    hint: "Distribute the negative sign carefully."
+                },
+                {
+                    q: "For what $k$ does system have no solution? $3x + y = 5$, $kx + 2y = 8$.",
+                    options: ["$6$", "$3$", "$1.5$", "$2$"],
+                    correct: 0,
+                    rationale: "Slopes must be equal (parallel). Slope1 = -3. Slope2 = $-k/2$. $-k/2 = -3 \\rightarrow k=6$.",
+                    hint: "Make the ratio of x and y coefficients the same."
+                },
+                {
+                    q: "Solve $x/3 + x/4 = 7$.",
+                    options: ["$12$", "$7$", "$14$", "$21$"],
+                    correct: 0,
+                    rationale: "Mult by 12 (LCD): $4x + 3x = 84 \\rightarrow 7x = 84 \\rightarrow x = 12$.",
+                    hint: "Clear fractions by multiplying by 12."
+                },
+                {
+                    q: "If $(x, y)$ is sol to $3x+2y=6$ and $x-y=2$, find $y$.",
+                    options: ["$0$", "$2$", "$1$", "$-1$"],
+                    correct: 0,
+                    rationale: "From 2nd eq: $x=y+2$. Sub in 1st: $3(y+2)+2y=6 \\rightarrow 3y+6+2y=6 \\rightarrow 5y=0 \\rightarrow y=0$.",
+                    hint: "Substitution usually works best here."
+                }
+            ],
+            relationships: [
+                {
+                    q: "What is the slope of the line $y = -3x + 5$?",
+                    options: ["$-3$", "$3$", "$5$", "$-5$"],
+                    correct: 0,
+                    rationale: "In $y=mx+b$, $m$ is the slope.",
+                    hint: "Identify the coefficient of x."
+                },
+                {
+                    q: "What is the y-intercept of $2x + 3y = 12$?",
+                    options: ["$(0, 4)$", "$(0, 6)$", "$(0, 12)$", "$(4, 0)$"],
+                    correct: 0,
+                    rationale: "Set $x=0$: $3y = 12 \\rightarrow y = 4$. Point is $(0, 4)$.",
+                    hint: "To find y-intercept, set $x=0$."
+                },
+                {
+                    q: "Line passes through $(1, 2)$ and $(3, 6)$. Slope?",
+                    options: ["$2$", "$4$", "$0.5$", "$3$"],
+                    correct: 0,
+                    rationale: "$(6-2)/(3-1) = 4/2 = 2$.",
+                    hint: "Formula: $(y_2 - y_1) / (x_2 - x_1)$."
+                },
+                {
+                    q: "Which equation represents a line parallel to $y = 2x + 1$?",
+                    options: ["$y = 2x - 5$", "$y = -0.5x + 1$", "$y = -2x + 1$", "$y = 0.5x$"],
+                    correct: 0,
+                    rationale: "Parallel lines have the same slope ($m=2$).",
+                    hint: "Look for the same slope m."
+                },
+                {
+                    q: "Slope of a line perpendicular to $y = 3x - 4$?",
+                    options: ["$-1/3$", "$3$", "$-3$", "$1/3$"],
+                    correct: 0,
+                    rationale: "Perpendicular slope is negative reciprocal. $3 \\rightarrow -1/3$.",
+                    hint: "Flip the fraction and change the sign."
+                },
+                {
+                    q: "Which is the equation of a vertical line?",
+                    options: ["$x = 5$", "$y = 5$", "$y = x$", "$x + y = 5$"],
+                    correct: 0,
+                    rationale: "Vertical lines are $x = constant$. Slope is undefined.",
+                    hint: "Vertical lines have constant x-values."
+                },
+                {
+                    q: "If graph of $ax + by = c$ has slope $2/3$, what is relationship of $a$ and $b$?",
+                    options: ["$-a/b = 2/3$", "$a/b = 2/3$", "$b/a = 2/3$", "$a - b = 2/3$"],
+                    correct: 0,
+                    rationale: "Rearrange to $y = (-a/b)x + c/b$. Slope is $-a/b$.",
+                    hint: "Solve the equation for y to find m."
+                },
+                {
+                    q: "Graph of $y = mx + b$ goes through $(0, 3)$ and $(1, 5)$. What is $b$?",
+                    options: ["$3$", "$5$", "$2$", "$0$"],
+                    correct: 0,
+                    rationale: "$b$ is the y-intercept. $(0, 3)$ is on the y-axis, so $b=3$.",
+                    hint: "The y-intercept is the y-value when x=0."
+                },
+                {
+                    q: "What does the slope represent in a graph of Cost vs. Hours?",
+                    options: ["Cost per hour", "Total Cost", "Fixed fee", "Hours worked"],
+                    correct: 0,
+                    rationale: "Slope is $\\Delta y / \\Delta x = \\text{Cost} / \\text{Hours} = \\text{Cost per hour}$.",
+                    hint: "Look at the units of rise over run."
+                },
+                {
+                    q: "Find the equation of line with slope 4 passing through $(1, 2)$.",
+                    options: ["$y = 4x - 2$", "$y = 4x + 2$", "$y = 4x - 6$", "$y = 2x + 4$"],
+                    correct: 0,
+                    rationale: "$y - 2 = 4(x - 1) \\rightarrow y - 2 = 4x - 4 \\rightarrow y = 4x - 2$.",
+                    hint: "Use point-slope form: $y - y_1 = m(x - x_1)$."
+                },
+                {
+                    q: "Which line goes down from left to right?",
+                    options: ["$y = -2x + 5$", "$y = 2x - 5$", "$y = 5$", "$x = 5$"],
+                    correct: 0,
+                    rationale: "Negative slope means the line falls/decreases.",
+                    hint: "Look for a negative coefficient of x."
+                },
+                {
+                    q: "Intersection of $y = 3$ and $x = -2$.",
+                    options: ["$(-2, 3)$", "$(3, -2)$", "$(0, 0)$", "None"],
+                    correct: 0,
+                    rationale: "The point where x is -2 and y is 3.",
+                    hint: "Combine coordinates directly."
+                },
+                {
+                    q: "Equation of line through $(0, 0)$ with slope -1.",
+                    options: ["$y = -x$", "$y = x$", "$y = -1$", "$x = -1$"],
+                    correct: 0,
+                    rationale: "$y = mx + b$. $m=-1, b=0$. So $y = -1x + 0$.",
+                    hint: "y-intercept is 0."
+                },
+                {
+                    q: "Slope of the line $2y = 4x + 8$.",
+                    options: ["$2$", "$4$", "$8$", "$0.5$"],
+                    correct: 0,
+                    rationale: "Divide by 2: $y = 2x + 4$. Slope is 2.",
+                    hint: "Isolate y to put in slope-intercept form."
+                },
+                {
+                    q: "Which ordered pair is a solution to $y < 2x$?",
+                    options: ["$(0, -1)$", "$(1, 2)$", "$(1, 3)$", "$(2, 4)$"],
+                    correct: 0,
+                    rationale: "Test $(0, -1)$: $-1 < 2(0) \\rightarrow -1 < 0$. True. Others fail ($2<2$ false).",
+                    hint: "Plug x and y into the inequality."
+                }
+            ]
+        };
+
+        // --- STATE & UTILS ---
+        let currentTopic = 'contexts';
+        let currentQIndex = 0;
+        let score = 0;
+        let userAnswers = [];
+        let isAnswered = false;
+
+        const els = {
+            app: document.getElementById('app'),
+            screens: {
+                start: document.getElementById('start-screen'),
+                quiz: document.getElementById('quiz-interface'),
+                results: document.getElementById('results-screen')
+            },
+            homeBtn: document.getElementById('home-btn'),
+            selector: document.getElementById('topic-selector'),
+            progress: document.getElementById('progress-bar'),
+            qNum: document.getElementById('current-q-num'),
+            totalQ: document.getElementById('total-q-num'),
+            qText: document.getElementById('question-text'),
+            options: document.getElementById('options-container'),
+            hintBox: document.getElementById('hint-box'),
+            hintText: document.getElementById('hint-text'),
+            feedback: document.getElementById('feedback-section'),
+            feedbackHeader: document.getElementById('feedback-header'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            feedbackRationale: document.getElementById('feedback-rationale'),
+            nextBtn: document.getElementById('next-btn'),
+            results: {
+                title: document.getElementById('result-title'),
+                score: document.getElementById('final-score'),
+                percent: document.getElementById('final-percent'),
+                msg: document.getElementById('final-message'),
+                analysis: document.getElementById('analysis-content')
+            }
+        };
+
+        function initMath() {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "$", right: "$", display: false}
+                    ]
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initMath);
+
+        function goHome() {
+            showScreen('start');
+            els.homeBtn.classList.add('hidden');
+        }
+
+        function showScreen(name) {
+            Object.values(els.screens).forEach(s => s.classList.add('hidden'));
+            els.screens[name].classList.remove('hidden');
+        }
+
+        function startQuiz() {
+            currentTopic = els.selector.value;
+            currentQIndex = 0;
+            score = 0;
+            userAnswers = [];
+            isAnswered = false;
+            els.totalQ.textContent = masterData[currentTopic].length;
+            showScreen('quiz');
+            els.homeBtn.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            isAnswered = false;
+            els.feedback.classList.add('hidden');
+            els.hintBox.classList.add('hidden');
+
+            const data = masterData[currentTopic];
+            const q = data[currentQIndex];
+
+            const progressPct = (currentQIndex / data.length) * 100;
+            els.progress.style.width = `${progressPct}%`;
+            els.qNum.textContent = currentQIndex + 1;
+
+            els.qText.innerHTML = q.q;
+            els.hintText.innerHTML = q.hint;
+
+            // Simple shuffle
+            const indices = q.options.map((_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+
+            els.options.innerHTML = '';
+            indices.forEach(i => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full text-left p-5 rounded-xl border-2 border-slate-200 hover:border-rose-500 hover:bg-rose-50 transition bg-white shadow-sm flex items-center group";
+                btn.innerHTML = `
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold text-sm mr-4 group-hover:bg-rose-200 group-hover:text-rose-700 transition">${String.fromCharCode(65 + indices.indexOf(i))}</span>
+                    <span class="text-lg text-slate-700 flex-1">${q.options[i]}</span>
+                `;
+                btn.onclick = () => checkAnswer(i, btn, indices);
+                els.options.appendChild(btn);
+            });
+
+            els.nextBtn.innerHTML = (currentQIndex === data.length - 1) 
+                ? 'Finish Practice'
+                : 'Next Question';
+
+            initMath();
+        }
+
+        function toggleHint() {
+            els.hintBox.classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedIndex, btn, indices) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const data = masterData[currentTopic];
+            const q = data[currentQIndex];
+            const isCorrect = selectedIndex === q.correct;
+
+            if (isCorrect) score++;
+            userAnswers.push({ qIndex: currentQIndex, correct: isCorrect, selected: selectedIndex });
+
+            const buttons = els.options.children;
+            Array.from(buttons).forEach((b, idx) => {
+                b.disabled = true;
+                b.classList.remove('hover:border-rose-500', 'hover:bg-rose-50');
+                const realIndex = indices[idx];
+                
+                if (realIndex === q.correct) {
+                    b.classList.add('border-green-500', 'bg-green-50');
+                    b.querySelector('span:first-child').classList.add('bg-green-200', 'text-green-800');
+                } else if (b === btn && !isCorrect) {
+                    b.classList.add('border-red-500', 'bg-red-50');
+                    b.querySelector('span:first-child').classList.add('bg-red-200', 'text-red-800');
+                } else {
+                    b.classList.add('opacity-50');
+                }
+            });
+
+            els.feedback.classList.remove('hidden');
+            els.feedbackIcon.className = isCorrect ? "rounded-full p-1 bg-green-100 text-green-600" : "rounded-full p-1 bg-red-100 text-red-600";
+            els.feedbackIcon.innerHTML = isCorrect 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+            
+            els.feedbackHeader.textContent = isCorrect ? "Correct!" : "Incorrect";
+            els.feedbackHeader.className = isCorrect ? "font-bold text-lg text-green-700" : "font-bold text-lg text-red-700";
+            els.feedbackRationale.innerHTML = q.rationale;
+            
+            els.feedback.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            initMath();
+        }
+
+        function nextQuestion() {
+            const data = masterData[currentTopic];
+            if (currentQIndex < data.length - 1) {
+                currentQIndex++;
+                renderQuestion();
+                els.screens.quiz.querySelector('.overflow-y-auto').scrollTop = 0;
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            const data = masterData[currentTopic];
+            showScreen('results');
+            els.homeBtn.classList.add('hidden');
+
+            const pct = Math.round((score / data.length) * 100);
+            
+            els.results.score.textContent = score;
+            els.results.percent.textContent = `${pct}%`;
+            
+            let msg = "";
+            if (pct >= 90) msg = "Algebra Master! You're ready for the next level.";
+            else if (pct >= 70) msg = "Great job! Review your mistakes to perfect your score.";
+            else msg = "Good start. Focus on the concepts explained below.";
+            els.results.msg.textContent = msg;
+
+            els.results.analysis.innerHTML = '';
+            
+            data.forEach((q, idx) => {
+                const ua = userAnswers.find(a => a.qIndex === idx);
+                const isCorrect = ua ? ua.correct : false;
+                
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`;
+                
+                item.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 min-w-[24px]">
+                            ${isCorrect 
+                                ? '<div class="w-6 h-6 rounded-full bg-green-200 text-green-700 flex items-center justify-center font-bold text-xs">✓</div>' 
+                                : '<div class="w-6 h-6 rounded-full bg-red-200 text-red-700 flex items-center justify-center font-bold text-xs">✗</div>'
+                            }
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-slate-800 font-medium mb-1">Q${idx + 1}: ${q.q}</div>
+                            ${!isCorrect ? `<div class="text-xs text-red-600 font-bold uppercase mb-1">Correct Answer: ${q.options[q.correct]}</div>` : ''}
+                            <div class="text-slate-600 text-sm mt-2 border-t ${isCorrect ? 'border-green-200' : 'border-red-200'} pt-2">
+                                <span class="font-bold text-xs uppercase opacity-70">Explanation:</span> ${q.rationale}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                els.results.analysis.appendChild(item);
+            });
+            
+            initMath();
+        }
+    </script>
+</body>
+</html>
